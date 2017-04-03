@@ -1,6 +1,11 @@
 document.getElementById('onboardbtn1').addEventListener('click', function() {
-  document.getElementById('table').style.display = "block";
+  document.getElementById('part2').style.display = "block";
   document.getElementById('part1').style.display = "none";
+}, false);
+
+document.getElementById('onboardbtn2').addEventListener('click', function() {
+  document.getElementById('part2').style.display = "none";
+  document.getElementById('table').style.display = "block";
 }, false);
 
 document.getElementById('enter').addEventListener('click', function() {
@@ -15,6 +20,12 @@ document.getElementById('skip').addEventListener('click', function() {
   document.getElementById('overlay').style.display = "block";
 }, false);
 
+document.getElementById('skip2').addEventListener('click', function() {
+  document.getElementById('part2').style.display = "none";
+  document.getElementById('onboarding').style.display = "none";
+  document.getElementById('overlay').style.display = "block";
+}, false);
+
 document.getElementById('takeAction').addEventListener('click', function() {
   document.getElementById('action').style.display = "block";
 }, false);
@@ -23,135 +34,59 @@ document.getElementById('closeAction').addEventListener('click', function() {
   document.getElementById('action').style.display = "none";
 }, false);
 
+function updateOrientation()
+{
+	var winHeight = $(window).height();
+	var winWidth = $(window).width();
+      if (winWidth > winHeight) {
+         console.log('lanscape');
+				 document.getElementById('category').style.display = "none";
+				 document.getElementById('takeAction').style.display = "none";
+				 document.getElementById('overlay').style.marginTop = '50px';
+      } else {
+         console.log('portrait');
+				 document.getElementById('category').style.display = "block";
+				 document.getElementById('takeAction').style.display = "none";
+				 document.getElementById('overlay').style.marginTop = '0px';
+      }
+}
 
-WebVRConfig = {
-  /**
-   * webvr-polyfill configuration
-   */
-  // Forces availability of VR mode.
-  //FORCE_ENABLE_VR: true, // Default: false.
+window.addEventListener("orientationchange", updateOrientation);
 
-  // Complementary filter coefficient. 0 for accelerometer, 1 for gyro.
-  //K_FILTER: 0.98, // Default: 0.98.
-
-  // How far into the future to predict during fast motion.
-  //PREDICTION_TIME_S: 0.040, // Default: 0.040 (in seconds).
-
-  // Flag to disable touch panner. In case you have your own touch controls
-  //TOUCH_PANNER_DISABLED: true, // Default: false.
-
-  // Enable yaw panning only, disabling roll and pitch. This can be useful for
-  // panoramas with nothing interesting above or below.
-  //YAW_ONLY: true, // Default: false.
-  // Enable the deprecated version of the API (navigator.getVRDevices).
-  //ENABLE_DEPRECATED_API: true, // Default: false.
-
-  // Scales the recommended buffer size reported by WebVR, which can improve
-  // performance. Making this very small can lower the effective resolution of
-  // your scene.
-  BUFFER_SCALE: 0.5, // default: 1.0
-
-  // Allow VRDisplay.submitFrame to change gl bindings, which is more
-  // efficient if the application code will re-bind it's resources on the
-  // next frame anyway.
-  // Dirty bindings include: gl.FRAMEBUFFER_BINDING, gl.CURRENT_PROGRAM,
-  // gl.ARRAY_BUFFER_BINDING, gl.ELEMENT_ARRAY_BUFFER_BINDING,
-  // and gl.TEXTURE_BINDING_2D for texture unit 0
-  // Warning: enabling this might lead to rendering issues.
-  //DIRTY_SUBMIT_FRAME_BINDINGS: true // default: false
-};
 
 // Setup three.js WebGL renderer
 var renderer = new THREE.WebGLRenderer( { antialias: true } );
 renderer.setPixelRatio( window.devicePixelRatio );
 // Append the canvas element created by the renderer to document body element.
 document.body.appendChild( renderer.domElement );
+
 //Create a three.js scene
 var scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2( 0xFFFFFF, 0.001 );
+
 //Create a three.js camera
 var camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.3, 10000);
 //Apply VR headset positional data to camera.
 var controls = new THREE.VRControls( camera );
 controls.standing = true;
+
 //Apply VR stereo rendering to renderer
 var effect = new THREE.VREffect( renderer );
 effect.setSize( window.innerWidth, window.innerHeight );
+
 // Create a VR manager helper to enter and exit VR mode.
 var manager = new WebVRManager( renderer, effect, {hideButton: false, isUndistorted: false} );
+scene.fog = new THREE.FogExp2( 0xFFFFFF, 0.001 );
 var light = new THREE.HemisphereLight(0x777777, 0x000000, 0.6);
 scene.add(light);
-
 var objlight = new THREE.PointLight(0xffffff, 0.7);
 objlight.position.set(0, 50, 70);
 scene.add(objlight);
 
-var classSelection = 0;
-
-// TOKEN
-
-var token = '052b97827c94c0dee56c29433c897a2e7c5de807a1140234ba5514643976b32b';
-
-// Circle Materials
-
-var particles, particle, EXmaterial, CRmaterial, ENmaterial, VUmaterial;
-
-function createCircleTexture(color, size) {
-  var matCanvas = document.createElement('canvas');
-  matCanvas.width = matCanvas.height = size;
-  var matContext = matCanvas.getContext('2d');
-  // create texture object from canvas.
-  var texture = new THREE.Texture(matCanvas);
-  // Draw a circle
-  var center = size / 2;
-  matContext.beginPath();
-  matContext.arc(center, center, size/2, 0, 2 * Math.PI, false);
-  matContext.closePath();
-  matContext.fillStyle = color;
-  matContext.fill();
-  // need to set needsUpdate
-  texture.needsUpdate = true;
-  // return a texture made from the canvas
-  return texture;
-}
-
-EXmaterial = new THREE.PointsMaterial({
-      color: 0xffffff,
-      size: 7,
-      // transparent: true,
-      blending: THREE.AdditiveBlending,
-      map: createCircleTexture('#FF4341', 32)
-});
-
-CRmaterial = new THREE.PointsMaterial({
-      color: 0xffffff,
-      size: 7,
-      // transparent: true,
-      blending: THREE.AdditiveBlending,
-      map: createCircleTexture('#FFC163', 32)
-});
-
-ENmaterial = new THREE.PointsMaterial({
-      color: 0xffffff,
-      size: 7,
-      // transparent: true,
-      blending: THREE.AdditiveBlending,
-      map: createCircleTexture('#BD96FF', 32)
-});
-
-VUmaterial = new THREE.PointsMaterial({
-      color: 0xffffff,
-      size: 7,
-      // transparent: true,
-      blending: THREE.AdditiveBlending,
-      map: createCircleTexture('#28E7FF', 32)
-});
-
 // Menu
 
 var textureLoader = new THREE.TextureLoader();
-var menuClosedMap = textureLoader.load( '../assets/menuclosed.png' );
-var menuMap = textureLoader.load( '../assets/menu.png' );
+var menuClosedMap = textureLoader.load( window.location.href+'/assets/menuclosed.png' );
+var menuMap = textureLoader.load( window.location.href+'/assets/menu.png' );
 var material = new THREE.SpriteMaterial( { map: menuClosedMap, color: 0xffffff, fog: true } );
 var menu = new THREE.Sprite( material );
 menu.scale.set(0.5, 0.5, 0.5);
@@ -186,7 +121,7 @@ setTimeout(function(){
 function addMenu() {
   for(i=0; i<10; i++){
     var textureLoader = new THREE.TextureLoader();
-    var menusrc = textureLoader.load( '../assets/'+i+'.png' );
+    var menusrc = textureLoader.load( window.location.href+'/assets/'+i+'.png' );
     var menumat = new THREE.SpriteMaterial( { map: menusrc, color: 0xffffff, fog: true } );
     var menuItem = new THREE.Sprite(menumat);
     menuItem.scale.set(2, 2, 2);
@@ -240,6 +175,11 @@ function addMenu() {
     });
   }
 }
+
+// TOKEN
+
+var token = '052b97827c94c0dee56c29433c897a2e7c5de807a1140234ba5514643976b32b';
+var classSelection = 0;
 
 // Individual species data
 var theID;
@@ -361,6 +301,61 @@ function histAssess(sciName) {
   }
 }
 
+// Circle Materials
+
+var particles, particle, EXmaterial, CRmaterial, ENmaterial, VUmaterial;
+
+function createCircleTexture(color, size) {
+  var matCanvas = document.createElement('canvas');
+  matCanvas.width = matCanvas.height = size;
+  var matContext = matCanvas.getContext('2d');
+  // create texture object from canvas.
+  var texture = new THREE.Texture(matCanvas);
+  // Draw a circle
+  var center = size / 2;
+  matContext.beginPath();
+  matContext.arc(center, center, size/2, 0, 2 * Math.PI, false);
+  matContext.closePath();
+  matContext.fillStyle = color;
+  matContext.fill();
+  // need to set needsUpdate
+  texture.needsUpdate = true;
+  // return a texture made from the canvas
+  return texture;
+}
+
+EXmaterial = new THREE.PointsMaterial({
+      color: 0xffffff,
+      size: 7,
+      // transparent: true,
+      blending: THREE.AdditiveBlending,
+      map: createCircleTexture('#FF4341', 32)
+});
+
+CRmaterial = new THREE.PointsMaterial({
+      color: 0xffffff,
+      size: 7,
+      // transparent: true,
+      blending: THREE.AdditiveBlending,
+      map: createCircleTexture('#FFC163', 32)
+});
+
+ENmaterial = new THREE.PointsMaterial({
+      color: 0xffffff,
+      size: 7,
+      // transparent: true,
+      blending: THREE.AdditiveBlending,
+      map: createCircleTexture('#BD96FF', 32)
+});
+
+VUmaterial = new THREE.PointsMaterial({
+      color: 0xffffff,
+      size: 7,
+      // transparent: true,
+      blending: THREE.AdditiveBlending,
+      map: createCircleTexture('#28E7FF', 32)
+});
+
 // visualize
 
 drawStars(0);
@@ -439,7 +434,7 @@ function drawStars(c) {
            clickCancelFuse: true, // Overrides global setting for fuse's clickCancelFuse
            reticleHoverColor: 0x00fff6, // Overrides global reticle hover color
            fuseVisible: true, // Overrides global fuse visibility
-           fuseDuration: 1, // Overrides global fuse duration
+           fuseDuration: 0.5, // Overrides global fuse duration
            fuseColor: 0xffffff, // Overrides global fuse color
            onGazeOver: function(){
              console.log(gazeExecuted);
@@ -466,7 +461,7 @@ function drawStars(c) {
            clickCancelFuse: true, // Overrides global setting for fuse's clickCancelFuse
            reticleHoverColor: 0x00fff6, // Overrides global reticle hover color
            fuseVisible: true, // Overrides global fuse visibility
-           fuseDuration: 1, // Overrides global fuse duration
+           fuseDuration: 0.5, // Overrides global fuse duration
            fuseColor: 0xffffff, // Overrides global fuse color
            onGazeOver: function(){
              console.log(gazeExecuted);
@@ -491,7 +486,7 @@ function drawStars(c) {
            clickCancelFuse: true, // Overrides global setting for fuse's clickCancelFuse
            reticleHoverColor: 0x00fff6, // Overrides global reticle hover color
            fuseVisible: true, // Overrides global fuse visibility
-           fuseDuration: 1, // Overrides global fuse duration
+           fuseDuration: 0.5, // Overrides global fuse duration
            fuseColor: 0xffffff, // Overrides global fuse color
            onGazeOver: function(){
              console.log(gazeExecuted);
@@ -517,7 +512,7 @@ function drawStars(c) {
             clickCancelFuse: true, // Overrides global setting for fuse's clickCancelFuse
             reticleHoverColor: 0x00fff6, // Overrides global reticle hover color
             fuseVisible: true, // Overrides global fuse visibility
-            fuseDuration: 1, // Overrides global fuse duration
+            fuseDuration: 0.5, // Overrides global fuse duration
             fuseColor: 0xffffff, // Overrides global fuse color
             onGazeOver: function(){
          		  console.log(gazeExecuted);
@@ -537,75 +532,10 @@ function drawStars(c) {
     }, 2000);
 }
 
-
-// --- Reticulum ---
-// initiate Reticulum so it loads up
-Reticulum.init(camera, {
-	proximity: false,
-	clickevents: true,
-	reticle: {
-		visible: true,
-		restPoint: 1, //Defines the reticle's resting point when no object has been targeted
-		color: 0xffffff,
-		innerRadius: 0.002,
-		outerRadius: 0.010,
-		hover: {
-			color: 0xffffff,
-			innerRadius: 0.02,
-			outerRadius: 0.025,
-			speed: 5,
-			vibrate: 50 //Set to 0 or [] to disable
-		}
-	},
-	fuse: {
-		visible: false,
-		duration: 2.5,
-		color: 0xffffff,
-		innerRadius: 0.025,
-		outerRadius: 0.03,
-		vibrate: 0, //Set to 0 or [] to disable
-		clickCancelFuse: false //If users clicks on targeted object fuse is canceled
-	}
-});
-scene.add(camera);
-
-function animate(timestamp) {
-
-	// --- Reticulum ---
-	// keep checking if user is looking at any tracked objects
-	Reticulum.update();
-
-	controls.update();
-	camera.updateMatrixWorld(); // Required to stop ghosting - must be placed before render update
-	manager.render(scene, camera, timestamp);
-	requestAnimationFrame(animate);
-
-}
-animate();
-
-// TERRAIN
-
-var terrainScene = THREE.Terrain({
-    easing: THREE.Terrain.EaseIn,
-    frequency: 16,
-    heightmap: THREE.Terrain.Perlin,
-    material: new THREE.MeshBasicMaterial({color: 0x579147}),
-    maxHeight: 0,
-    minHeight: -100,
-    steps: 1,
-    useBufferGeometry: false,
-    xSegments: 251,
-    xSize: 2048,
-    ySegments: 251,
-    ySize: 2048,
-});
-
-scene.add(terrainScene);
-
 // TEXT
 
 var loader = new THREE.FontLoader();
-loadClassTitle(0);
+//loadClassTitle(0);
 
 function loadClassTitle(cl){
   var classname;
@@ -675,7 +605,7 @@ function loadClassTitle(cl){
       break;
     }
 
-  loader.load( '../external/font/Dosis_Light.json', function ( font ) {
+  loader.load( window.location.href+'/external/font/Dosis_Light.json', function ( font ) {
       var textGeo = new THREE.TextGeometry( classname, {
           font: font,
           size: 25,
@@ -687,8 +617,8 @@ function loadClassTitle(cl){
       var classtitle = new THREE.Mesh( textGeo, textMaterial );
       classtitle.name = "classtitle";
 
-      classtitle.rotation.y = Math.PI-0.5;
-      classtitle.position.set(-70, 0, 400);
+      // classtitle.rotation.y = Math.PI-0.5;
+      classtitle.position.set(-70, 0, -400);
       scene.add( classtitle );
   } );
 }
@@ -698,7 +628,7 @@ function loadClassTitle(cl){
 bigTitle();
 
 function bigTitle() {
-  loader.load( '../external/font/Dosis_Light.json', function ( font ) {
+  loader.load( window.location.href+'/external/font/Dosis_Light.json', function ( font ) {
       var textGeo = new THREE.TextGeometry( "A Constellation Guide to", {
           font: font,
           size: 20,
@@ -713,7 +643,7 @@ function bigTitle() {
       scene.add( mesh );
   });
 
-  loader.load( '../external/font/Megrim_Medium.json', function ( font ) {
+  loader.load( window.location.href+'/external/font/Megrim_Medium.json', function ( font ) {
       var textGeo = new THREE.TextGeometry( "The Sixth Mass Extinction", {
           font: font,
           size: 30,
@@ -730,10 +660,10 @@ function bigTitle() {
       scene.add( mesh );
   } );
 
-  loader.load( '../external/font/Dosis_Light.json', function ( font ) {
+  loader.load( window.location.href+'/external/font/Dosis_Light.json', function ( font ) {
       var textGeo = new THREE.TextGeometry( "Look down to bring up menu", {
           font: font,
-          size: 0.15,
+          size: 0.2,
           height: 0,
           curveSegments: 2,
           bevelEnabled: false
@@ -741,7 +671,7 @@ function bigTitle() {
       var textMaterial = new THREE.MeshPhongMaterial( { color: 0xFFFFFF } );
       var mesh = new THREE.Mesh( textGeo, textMaterial );
       mesh.name = 'helper';
-      mesh.position.set(-1.2, 0, -5.5);
+      mesh.position.set(-1.4, 0, -5.5);
       scene.add( mesh );
   } );
 
@@ -769,6 +699,78 @@ function bigTitle() {
   arrowHelper.name = 'arrow';
   scene.add( arrowHelper );
 }
+
+
+// TERRAIN
+
+var terrainScene = THREE.Terrain({
+    easing: THREE.Terrain.EaseIn,
+    frequency: 16,
+    heightmap: THREE.Terrain.Perlin,
+    material: new THREE.MeshBasicMaterial({color: 0x579147}),
+    maxHeight: 0,
+    minHeight: -100,
+    steps: 1,
+    useBufferGeometry: false,
+    xSegments: 251,
+    xSize: 2048,
+    ySegments: 251,
+    ySize: 2048,
+});
+
+scene.add(terrainScene);
+
+// *******************************
+// --- Reticulum ---
+// initiate Reticulum so it loads up
+Reticulum.init(camera, {
+	proximity: false,
+	clickevents: true,
+	reticle: {
+		visible: true,
+		restPoint: 10, //Defines the reticle's resting point when no object has been targeted
+		color: 0xffffff,
+		innerRadius: 0.002,
+		outerRadius: 0.010,
+		hover: {
+			color: 0xffffff,
+			innerRadius: 0.02,
+			outerRadius: 0.025,
+			speed: 5,
+			vibrate: 50 //Set to 0 or [] to disable
+		}
+	},
+	fuse: {
+		visible: false,
+		duration: 2.5,
+		color: 0xffffff,
+		innerRadius: 0.03,
+		outerRadius: 0.035,
+		vibrate: 0, //Set to 0 or [] to disable
+		clickCancelFuse: false //If users clicks on targeted object fuse is canceled
+	}
+});
+
+// IMPORTANT add camera to cene if you want to see a reticle
+scene.add(camera);
+
+
+function animate(timestamp) {
+
+	// *******************************
+	// --- Reticulum ---
+	// keep checking if user is looking at any tracked objects
+	Reticulum.update();
+
+	controls.update();
+	camera.updateMatrixWorld(); // Required to stop ghosting - must be placed before render update
+	manager.render(scene, camera, timestamp);
+
+	requestAnimationFrame(animate);
+
+}
+animate();
+
 
 /*
 Handle window resizes
